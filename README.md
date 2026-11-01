@@ -2,8 +2,12 @@
 
 给小米 RD08（BE6500 Pro，固件 1.1.96，release 通道，有线 AP 模式）装一套**重启不掉的、仅公钥、仅内网**的 SSH 管理通道。
 
-> **前提**：设备已经具备 root 权限。本仓库不包含取得 root 的方法，只解决「root 之后怎么稳定地 SSH 进去」。
+> **前提**：设备已经具备 root 权限。本仓库解决「root 之后怎么稳定地 SSH 进去」。
 > 请只在自己的设备上使用。
+>
+> ⚠️ **安全公告**：RD08 固件 **≤ 1.1.96** 存在认证后命令注入（`set_macfilter_rules` 的 `name` 参数），
+> 已在 **1.1.123** 修复。如果你还在这两个版本之间，请先升级并自查，
+> 详见 [docs/advisory-2026-11-01-rd08-auth-rce.md](docs/advisory-2026-11-01-rd08-auth-rce.md)。
 
 ---
 
@@ -147,6 +151,7 @@ scripts/install.sh               安装脚本
 scripts/start-ssh.sh.template    看门狗模板
 scripts/apssh                    客户端快捷脚本
 docs/verification.md             验证步骤
+docs/advisory-2026-11-01-rd08-auth-rce.md   安全公告（≤1.1.96 受影响，1.1.123 修复）
 ```
 
 ## License
