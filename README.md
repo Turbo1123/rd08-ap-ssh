@@ -5,7 +5,7 @@
 > **本仓库分两部分**：
 >
 > 1. **取得 root**（仅 ≤ 1.1.96）：见 [安全公告第 3 节](docs/advisory-2026-11-01-rd08-auth-rce.md#3-复现196)，
->    含接口、参数与最小复现命令；
+>    或完整的 [从零开始的分步教程](docs/guide-full-root.md)，含登录取 token、注入、装 dropbear、持久化、验证；
 > 2. **root 之后的固化**：本 README 与 `scripts/`，让 SSH 重启不掉。
 >
 > ⚠️ **安全公告**：RD08 固件 **≤ 1.1.96** 存在认证后命令注入（`set_macfilter_rules` 的 `name` 参数），
