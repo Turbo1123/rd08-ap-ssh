@@ -73,10 +73,19 @@ uid=0(root) gid=0(root)
 ## 4. 修复
 
 - **升级到 1.1.123 或更高**。1.1.96 及以下均受影响。
-- 说明：1.1.123 的更新日志只写了「其他安全漏洞修复」，**未点名本问题**。
-  作者对 1.1.123 镜像做过静态比对：`/usr/sbin/sysapi`、`/usr/sbin/macfilter`、`/usr/sbin/macfilterctl`
-  与 1.1.96 完全一致（SHA-256 相同）；LuCI 控制器是 LuaJIT + 混淆字节码，无法静态读出校验逻辑。
-  因此「1.1.123 已修复」属于**基于版本更新与厂商披露节奏的推断，未经运行时实测确认**。
+- **静态比对结论（已确认）**：1.1.123 的更新日志只写「其他安全漏洞修复」，未点名本问题。
+  作者对两个版本的 LuCI 控制器做了反混淆对比（LuaJIT + `Fate/Z` 混淆，工具见下）：
+  - 1.1.96 注册 **178** 条 `api/xqsystem/*` 路由，1.1.123 为 **164** 条；
+  - 1.1.123 **删除了 14 条** 防火墙/过滤类路由，其中包含 `set_macfilter_rules`，同批还有
+    `get/set_macfilter_info`、`set_macfilter_rule`、`set_macfilter_enable_mode`、
+    `get/set_ipfilter_*`、`get/set_firewall_enable`、`get/set_spi_firewall`、`get/set_wanping_firewall`；
+  - 该名字在 1.1.123 中只剩函数定义（死代码），**没有任何控制器再注册这条路由**，
+    LuCI 对未注册路径返回 404，注入入口不可达；
+  - `/usr/sbin/sysapi`、`/usr/sbin/macfilter`、`/usr/sbin/macfilterctl` 两版逐字节相同，
+    说明修复方式是**移除路由**，而不是在这些脚本里加校验。
+
+  反混淆方法：`xqluac`（转换 `Fate/Z` 魔数与 opcode 映射）+ `unluac_miwifi`（反编译），
+  对 `/usr/lib/lua/luci/controller/**` 逐个处理。
 - 本报告提交 MiSRC 后按「重复」关闭（已有其他研究者先报同一问题）；固件 1.1.123 已发布，该问题在其修复范围内。
 
 ## 5. 自查：设备是否已被改过
