@@ -1,0 +1,6 @@
+*.key
+*.pem
+id_*
+*.private.*
+*.private
+*.log

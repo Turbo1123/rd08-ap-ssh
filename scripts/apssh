@@ -1,0 +1,12 @@
+#!/bin/sh
+# 客户端快捷入口：./apssh [命令]
+# 可用环境变量覆盖：AP_IP / PORT / KEY
+AP_IP=${AP_IP:-192.168.1.10}
+PORT=${PORT:-22222}
+KEY=${KEY:-$HOME/.ssh/id_ed25519}
+
+exec ssh -i "$KEY" -p "$PORT" \
+    -o HostKeyAlgorithms=+ssh-rsa \
+    -o PubkeyAcceptedAlgorithms=+ssh-rsa \
+    -o StrictHostKeyChecking=accept-new \
+    "root@$AP_IP" "$@"

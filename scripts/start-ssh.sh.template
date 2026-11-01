@@ -1,0 +1,20 @@
+#!/bin/sh
+# 每分钟由 cron 调用：重建 /etc 下的软链，并保证 dropbear 在跑。
+# 幂等：已在监听则直接退出。由 install.sh 生成，@AP_IP@ / @PORT@ 会被替换。
+BASE=/data/admin-ssh
+KEY=$BASE/dropbear_rsa_host_key
+BIND=@AP_IP@
+PORT=@PORT@
+
+[ -s "$KEY" ] || exit 1
+
+# /etc 是 ramfs，重启后整个目录被重铺，软链必须每次重建
+mkdir -p /etc/dropbear
+ln -sf "$BASE/authorized_keys" /etc/dropbear/authorized_keys
+
+# 用内核 socket 表判断是否已监听（LISTEN = 0A），不依赖 pid 文件
+HEX=$(printf '%04X' "$PORT")
+awk -v p=":$HEX" '$2 ~ p"$" && $4 == "0A" {f=1} END{exit !f}' /proc/net/tcp && exit 0
+
+exec /usr/sbin/dropbear -s -g -j -k -T 3 -I 600 -K 60 -W 65536 \
+     -r "$KEY" -p "$BIND:$PORT" -P /tmp/admin-ssh.pid
